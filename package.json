@@ -1,0 +1,62 @@
+{
+  "name": "codegemma-assistant",
+  "displayName": "CodeGemma Assistant",
+  "description": "Generate code with Gemini CodeGemma",
+  "version": "0.0.1",
+  "publisher": "shivajithmutteal",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "AI",
+    "Chat",
+    "Machine Learning"
+  ],
+  "keywords": [
+    "codegemma",
+    "huggingface",
+    "AI code",
+    "generate",
+    "extension",
+    "coder",
+    "code agent",
+    "code generator"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCommand:codegemma.generateCode"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "codegemma.generateCode",
+        "title": "CodeGemma: Generate Code"
+      }
+    ],
+    "configuration": {
+      "title": "CodeGemmaAssistant",
+      "properties": {
+        "codegemma.apiKey": {
+          "type": "string",
+          "description": "Hugging Face API key for CodeGemma",
+          "default": ""
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@huggingface/inference": "^4.5.1",
+    "axios": "^1.6.0"
+  }
+}

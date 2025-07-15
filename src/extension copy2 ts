@@ -1,0 +1,86 @@
+/**
+ * @file extension.ts
+ * @description VS Code extension entry point for CodeGemma Assistant.
+ * 
+ * 🧠 Purpose:
+ *  - Registers the command `codegemma.generate` in VS Code.
+ *  - Sends selected code or prompts to the CodeGemma model hosted on Hugging Face.
+ *  - Displays AI-generated output in a new text document.
+ * 
+ * 🔧 Technologies:
+ *  - Language: TypeScript (.ts)
+ *  - API Calls: Axios
+ *  - Platform: VS Code Extension API
+ * 
+ * 📌 Notes:
+ *  - Selected text from the editor is sent as input.
+ *  - The response is shown in a new document.
+ * 
+ * 💡 Why TypeScript?
+ *  - Type safety: Catch bugs during development
+ *  - Code completion and IntelliSense
+ *  - Better developer experience in VS Code
+ * 
+ * © 2025 Shiavjith Mutteal
+ */
+
+import * as vscode from 'vscode';
+
+
+export function activate(context: vscode.ExtensionContext) {
+  const disposable = vscode.commands.registerCommand('codegemma.generateCode', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showInformationMessage('No active editor');
+      return;
+    }
+
+    const selectedText = editor.document.getText(editor.selection);
+    if (!selectedText) {
+      vscode.window.showInformationMessage('Please select some code or prompt.');
+      return;
+    }
+
+    const apiKey = vscode.workspace.getConfiguration().get<string>('codegemma.apiKey');
+    if (!apiKey) {
+      vscode.window.showErrorMessage('Please set your Hugging Face API key in settings (codegemma.apiKey).');
+      return;
+    }
+
+    vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Querying CodeGemma...', cancellable: false }, async () => {
+      try {
+        //const response = await axios.post('https://api-inference.huggingface.co/models/google/codegemma-7b-it',
+        //const response = await axios.post('https://api-inference.huggingface.co/models/google/codegemma-2b',
+        // const response = await axios.post('https://api-inference.huggingface.co/models/bigcode/starcoder2-3b',
+        //   { inputs: selectedText },
+        //   { headers: { Authorization: `Bearer ${apiKey}` } }   
+
+        const fetchResponse = await fetch('https://api-inference.huggingface.co/models/gpt2', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + apiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ inputs: selectedText })
+        });
+
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
+        }
+        const data = await fetchResponse.json();
+        const result = Array.isArray(data) && data[0]?.generated_text ? data[0].generated_text : 'No response from CodeGemma';
+
+        const doc = await vscode.workspace.openTextDocument({ content: result, language: 'plaintext' });
+        await vscode.window.showTextDocument(doc);
+      } catch (err) {
+        vscode.window.showErrorMessage('Error querying CodeGemma: ' + err);
+      }
+    });
+  });
+
+  context.subscriptions.push(disposable);
+}
+
+export function deactivate() {}
+
+

@@ -1,0 +1,87 @@
+/**
+ * @file extension.ts
+ * @description VS Code extension entry point for CodeGemma Assistant.
+ * 
+ * 🧠 Purpose:
+ *  - Registers the command `codegemma.generate` in VS Code.
+ *  - Sends selected code or prompts to the CodeGemma model hosted on Hugging Face.
+ *  - Displays AI-generated output in a new text document.
+ * 
+ * 🔧 Technologies:
+ *  - Language: TypeScript (.ts)
+ *  - API Calls: Axios
+ *  - Platform: VS Code Extension API
+ * 
+ * 📌 Notes:
+ *  - Selected text from the editor is sent as input.
+ *  - The response is shown in a new document.
+ * 
+ * 💡 Why TypeScript?
+ *  - Type safety: Catch bugs during development
+ *  - Code completion and IntelliSense
+ *  - Better developer experience in VS Code
+ * 
+ * © 2025 Shiavjith Mutteal
+ */
+
+/**
+ * @file extension.ts
+ * @description VS Code extension entry point for CodeGemma Assistant using Hugging Face Inference SDK.
+ */
+
+import * as vscode from 'vscode';
+import { HfInference } from '@huggingface/inference';
+
+export function activate(context: vscode.ExtensionContext) {
+  const disposable = vscode.commands.registerCommand('codegemma.generateCode', async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showInformationMessage('No active editor');
+      return;
+    }
+
+    const selectedText = editor.document.getText(editor.selection);
+    if (!selectedText) {
+      vscode.window.showInformationMessage('Please select some code or prompt.');
+      return;
+    }
+
+    const apiKey = vscode.workspace.getConfiguration().get<string>('codegemma.apiKey');
+    if (!apiKey) {
+      vscode.window.showErrorMessage('Please set your Hugging Face API key in settings (codegemma.apiKey).');
+      return;
+    }
+
+    const inference = HfInference({ apiKey });
+
+    vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: 'Querying CodeGemma...',
+      cancellable: false
+    }, async () => {
+      try {
+        const result = await inference.textGeneration({
+          //model: 'google/codegemma-7b-it',
+          model: 'google/codegemma-2b',
+          inputs: selectedText,
+          parameters: {
+            max_new_tokens: 512,
+            return_full_text: false
+          }
+        });
+
+        const doc = await vscode.workspace.openTextDocument({
+          content: result.generated_text,
+          language: 'plaintext'
+        });
+        await vscode.window.showTextDocument(doc);
+      } catch (err) {
+        vscode.window.showErrorMessage('Error querying CodeGemma: ' + err);
+      }
+    });
+  });
+
+  context.subscriptions.push(disposable);
+}
+
+export function deactivate() {}

@@ -1,0 +1,26 @@
+/**
+ * @file .vscodeignore
+ * @description Lists files and folders to exclude when packaging the VS Code extension using `vsce`.
+ * These entries help reduce package size and prevent sensitive or development-only files from being bundled.
+ */
+
+# Folders to exclude
+node_modules
+.vscode
+dist/*.map
+out/
+coverage/
+test/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary
+*.log
+*.tmp
+
+# Environment & config files
+.env
+*.env
+tsconfig.tsbuildinfo
