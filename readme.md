@@ -1,4 +1,3 @@
-
 # CodeGemma Assistant VS Code Extension
 
 Generate code using Hugging Face models directly from VS Code!
@@ -52,8 +51,8 @@ Generate code using Hugging Face models directly from VS Code!
 ---
 
 ## 🧠 Model Support
-- You can use any Hugging Face model that supports hosted inference and text generation.
-- Example: `Salesforce/codegen-16B-multi`
+- You can use any model hosted on Hugging Face that supports hosted inference and text generation.
+- Example: `google/codegemma-2b` (CodeGemma is a Google model, but is hosted on Hugging Face)
 - If you get a 404 or error, the model may not be available for public inference.
 
 ---
